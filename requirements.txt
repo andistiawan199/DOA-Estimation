@@ -4,3 +4,4 @@ pyargus.directionEstimation
 scipy.spatial
 collections
 numpy
+pandas
