@@ -55,7 +55,6 @@ def get_angle(X):
         scanning_vectors[:, i] = np.exp(array_alignment * 1j * 2 * np.pi * np.sin(np.radians(incident_angles[i])) / wavelength)  # scanning vector
 
     ula_scanning_vectors = scanning_vectors
-
     # Estimate DOA
     MUSIC = DOA_MUSIC(R, ula_scanning_vectors, signal_dimension=1)
     norm_data = np.divide(np.abs(MUSIC), np.max(np.abs(MUSIC)))
@@ -99,15 +98,15 @@ def calculate_data(iq_data):
         data_table_1.append([i_curr,q_curr,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,converted_to_plus_minus])
     phase_ref = np.mean(ref_phases)
     st.markdown('#')
-    st.write("**Tabel Reference Period** (data IQ 1-8)")
+    st.markdown('### **Tabel Reference Period**')
     df = pd.DataFrame(data_table_1,columns=('I','Q','Rad Phase (Current)','Rad Phase (Next)','Deg Phase (Current)','Deg Phase (Next)','Deg Phase (Next-Current)','to_plus_minus function'))
     st.table(df)
     st.write("**Phase Reference:**",phase_ref)
     st.write("**Keterangan Tabel Reference Period:**")
     st.write("**I:** Data I")
     st.write("**Q:** Data Q")
-    st.write("**Rad Phase (Current):** Hasil hitung iq dalam bentuk radian, i dan q dihitung menggunakan fungsi numpy.arctan2()")
-    st.write("**Rad Phase (Next):** Hasil hitung iq yang berikutnya(index iq+1) dalam bentuk radian, i dan q dihitung menggunakan fungsi numpy.arctan2()")
+    st.write("**Rad Phase (Current):** Hasil hitung iq dalam bentuk radian, i dan q dihitung menggunakan fungsi numpy.arctan2(iq.imaginary, iq.real)")
+    st.write("**Rad Phase (Next):** Hasil hitung iq yang berikutnya(index iq+1) dalam bentuk radian, i dan q dihitung menggunakan fungsi numpy.arctan2(iq.imaginary, iq.real)")
     st.write("**Deg Phase (Current):** Hasil konversi dari kolom **Rad Phase (Current)** yang sebelumnya radian menjadi degree, menggunakan fungsi numpy.rad2deg()")
     st.write("**Deg Phase (Next):** Hasil konversi dari kolom **Rad Phase (Next)** yang sebelumnya radian menjadi degree, menggunakan fungsi numpy.rad2deg()")
     st.write("**Deg Phase (Next-Current):** Hasil hitung dari kolom **Rad Phase (Next)** dikurang **(-)** dengan kolom **Rad Phase (Current)**")
@@ -136,14 +135,14 @@ def calculate_data(iq_data):
             azimuth_phases.append(diff_phase)
             data_table_2.append([i_curr,q_curr,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,diff_phase,diff_phase,0])
     st.markdown('##')
-    st.write("**Tabel Sample Slot** (data IQ 9-42)")
+    st.markdown('### **Table Sample Slot**')
     df = pd.DataFrame(data_table_2,columns=('I','Q','Rad Phase (Current)','Rad Phase (Next)','Deg Phase (Current)','Deg Phase (Next)','Deg Diff Phase','to_plus_minus function','Azimuth Phase','Elevation Phase'))
     st.table(df)
     st.write("**Keterangan Tabel Sample Slot:**")
     st.write("**I:** Data I")
     st.write("**Q:** Data Q")
-    st.write("**Rad Phase (Current):** Hasil hitung iq dalam bentuk radian, i dan q dihitung menggunakan fungsi numpy.arctan2()")
-    st.write("**Rad Phase (Next):** Hasil hitung iq yang berikutnya(index iq+1) dalam bentuk radian, i dan q dihitung menggunakan fungsi numpy.arctan2()")
+    st.write("**Rad Phase (Current):** Hasil hitung iq dalam bentuk radian, i dan q dihitung menggunakan fungsi numpy.arctan2(iq.imaginary, iq.real)")
+    st.write("**Rad Phase (Next):** Hasil hitung iq yang berikutnya(index iq+1) dalam bentuk radian, i dan q dihitung menggunakan fungsi numpy.arctan2(iq.imaginary, iq.real)")
     st.write("**Deg Phase (Current):** Hasil konversi dari kolom **Rad Phase (Current)** yang sebelumnya radian menjadi degree, menggunakan fungsi numpy.rad2deg()")
     st.write("**Deg Phase (Next):** Hasil konversi dari kolom **Rad Phase (Next)** yang sebelumnya radian menjadi degree, menggunakan fungsi numpy.rad2deg()")
     st.write("**Deg Diff Phase:** Hasil hitung dari kolom **(Rad Phase (Next)-Rad Phase (Current)) - 2 * Phase Reference**(diambil dari hasil rata-rata tabel sebelumnya)")
@@ -153,22 +152,83 @@ def calculate_data(iq_data):
 
 
     st.markdown('##')
-    st.write("**MUSIC Algorithm**")
-    st.write("Akan diisi dengan penjelasan proses MUSIC Algorithm, sedang dalam pengerjaan")
-    
+    st.markdown('### **MUSIC Algorithm**')
+    st.write("**Perhitungan Azimuth Angle**")
+    st.write("Semua isi kolom **Azimuth Phase** dari tabel **Sample Slot** diproses dengan Python Code Berikut:")
+    code = '''
+    X = np.zeros((M, np.size(x_00)), dtype=complex)
+    X[0, :] = x_00
+    for i in azimuth_phases:
+        azimuth_x_12.append(np.exp(1j * np.deg2rad(i)))
+    X[1, :] = azimuth_x_12'''
+    st.code(code, language='python')
     # MUSIC algo
     X = np.zeros((M, np.size(x_00)), dtype=complex)
     X[0, :] = x_00
     for i in azimuth_phases:
         azimuth_x_12.append(np.exp(1j * np.deg2rad(i)))
     X[1, :] = azimuth_x_12
+    st.write("Setelah azimuth phase diproses menghasilkan data")
+    st.write("Real part of azimuth_x_12: ", X.real)
+    st.write("Imaginary part of azimuth_x_12: ", X.imag)
+    st.write("Data diatas dihitung dengan mengestimasi matriks korelasi spasial untuk mendapatkan azimuth_angle menggunakan fungsi python **get_angle()**(ada dibawah): ")
     azimuth_angle = get_angle(X)
-    
+    st.write("Dari perhitungan tersebut menghasilkan **Azimuth Angle**: ",azimuth_angle)
     for i in elevation_phases:
         elevation_x_12.append(np.exp(1j * np.deg2rad(i)))
     X[1, :] = elevation_x_12
     elevation_angle = get_angle(X)
+
+    st.markdown('##')
+    st.write("**Perhitungan Elevation Angle**")
+    st.write("Semua isi kolom **Elevation Phase** dari tabel **Sample Slot** diproses dengan Python Code Berikut:")
+    code = '''
+    X = np.zeros((M, np.size(x_00)), dtype=complex)
+    X[0, :] = x_00
+    for i in elevation_phases:
+        elevation_x_12.append(np.exp(1j * np.deg2rad(i)))
+    X[1, :] = elevation_x_12'''
+    st.code(code, language='python')
+    st.write("Setelah elevation phase diproses menghasilkan data")
+    st.write("Real part of elevation_x_12: ", X.real)
+    st.write("Imaginary part of elevation_x_12: ", X.imag)
+    st.write("Data diatas dihitung dengan mengestimasi matriks korelasi spasial untuk mendapatkan elevation_angle menggunakan fungsi python **get_angle()**(ada dibawah): ")
+    st.write("Dari perhitungan tersebut menghasilkan **Elevation Angle**: ",elevation_angle)
+
+
+
+    st.markdown('##')
+    st.write("**Fungsi get_angle()**")
+
+    code = '''
+    array_alignment = np.arange(0, M, 1) * d
+    incident_angles = np.arange(-90, 91, 1)
+    scanning_vectors = np.zeros((M, np.size(incident_angles)), dtype=complex)
+    for i in range(np.size(incident_angles)):
+        scanning_vectors[:, i] = np.exp(array_alignment * 1j * 2 * np.pi * np.sin(np.radians(incident_angles[i])) / wavelength)
+
+    ula_scanning_vectors = scanning_vectors
     
+    MUSIC = DOA_MUSIC(R, ula_scanning_vectors, signal_dimension=1)
+    norm_data = np.divide(np.abs(MUSIC), np.max(np.abs(MUSIC)))
+    return float(incident_angles[np.where(norm_data == 1)[0]][0])'''
+    st.code(code, language='python')
+    
+    st.markdown('##')
+    st.write("**Menentukan Estimasi Koordinat(x, y)**")
+    st.write("Berikut adalah penjelasan proses/ urutan menentukan koordinat dari python code:")
+    code = '''
+    nx = np.cos(np.deg2rad(90.0 - azimuth))
+    nz = np.cos(np.deg2rad(90.0 - abs(elevation)))
+    if math.isclose(nx, 0.0, abs_tol=1e-16) or math.isclose(nz, 0.0, abs_tol=1e-16):
+        return [float("nan"),  float("nan")]
+    else:
+        ny = np.sqrt(1 - nx ** 2 - nz ** 2)
+        t = (height - receiver_coords[2]) / nz
+        x = receiver_coords[0] + t * nx
+        y = receiver_coords[1] - t * ny
+    return [x, y]'''
+    st.code(code, language='python')
 
     xy = get_coordinate(azimuth_angle, elevation_angle, z_beacon, [x_locator, y_locator, z_locator])
     if not math.isnan(xy[0]) and not math.isnan(xy[1]):
@@ -181,7 +241,7 @@ def calculate_data(iq_data):
         # st.write("Y: ",xy[1])
         data_table_3 = [[azimuth_angle,elevation_angle,xy[0],xy[1]]]
         st.markdown('##')
-        st.write("**Tabel Result**")
+        st.markdown('### **Table Result**')
         df = pd.DataFrame(data_table_3,columns=('Azimuth Angle','Elevation Angle','X','Y'))
         st.table(df)
 
