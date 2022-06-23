@@ -98,7 +98,7 @@ def calculate_data(iq_data):
         data_table_1.append([i_curr,q_curr,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,converted_to_plus_minus])
     phase_ref = np.mean(ref_phases)
     st.markdown('#')
-    st.markdown('### **Tabel Reference Period**')
+    st.markdown('### **<h3 style="color:Blue;">Table Reference Period</h3>**',unsafe_allow_html=True)
     df = pd.DataFrame(data_table_1,columns=('I','Q','Rad Phase (Current)','Rad Phase (Next)','Deg Phase (Current)','Deg Phase (Next)','Deg Phase (Next-Current)','to_plus_minus function'))
     st.table(df)
     st.write("**Phase Reference:**",phase_ref)
@@ -135,7 +135,7 @@ def calculate_data(iq_data):
             azimuth_phases.append(diff_phase)
             data_table_2.append([i_curr,q_curr,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,diff_phase,diff_phase,0])
     st.markdown('##')
-    st.markdown('### **Table Sample Slot**')
+    st.markdown('### **<h3 style="color:Blue;">Table Sample Slot</h3>**',unsafe_allow_html=True)
     df = pd.DataFrame(data_table_2,columns=('I','Q','Rad Phase (Current)','Rad Phase (Next)','Deg Phase (Current)','Deg Phase (Next)','Deg Diff Phase','to_plus_minus function','Azimuth Phase','Elevation Phase'))
     st.table(df)
     st.write("**Keterangan Tabel Sample Slot:**")
@@ -152,7 +152,7 @@ def calculate_data(iq_data):
 
 
     st.markdown('##')
-    st.markdown('### **MUSIC Algorithm**')
+    st.markdown('### **<h3 style="color:Blue;">MUSIC Algorithm</h3>**',unsafe_allow_html=True)
     st.write("**Perhitungan Azimuth Angle**")
     st.write("Semua isi kolom **Azimuth Phase** dari tabel **Sample Slot** diproses dengan Python Code Berikut:")
     code = '''
@@ -232,16 +232,9 @@ def calculate_data(iq_data):
 
     xy = get_coordinate(azimuth_angle, elevation_angle, z_beacon, [x_locator, y_locator, z_locator])
     if not math.isnan(xy[0]) and not math.isnan(xy[1]):
-        # print(f'azimuth_angle:{azimuth_angle}, elevation_angle:{elevation_angle}')
-        # print(f'x_beacon:{xy[0]}, y_beacon:{xy[1]}')
-        # return azimuth_angle
-        # st.write("Azimuth Angle: ",azimuth_angle)
-        # st.write("Elevation Angle: ",elevation_angle)
-        # st.write("X: ",xy[0])
-        # st.write("Y: ",xy[1])
         data_table_3 = [[azimuth_angle,elevation_angle,xy[0],xy[1]]]
         st.markdown('##')
-        st.markdown('### **Table Result**')
+        st.markdown('### **<h3 style="color:Blue;">Table Hasil</h3>**',unsafe_allow_html=True)
         df = pd.DataFrame(data_table_3,columns=('Azimuth Angle','Elevation Angle','X','Y'))
         st.table(df)
 
