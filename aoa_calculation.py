@@ -71,6 +71,18 @@ def get_coordinate(azimuth, elevation, height, receiver_coords):
         t = (height - receiver_coords[2]) / nz
         x = receiver_coords[0] + t * nx
         y = receiver_coords[1] - t * ny
+
+    
+    st.write("Perhitungan: ")
+    st.latex('nx = \cos{(90.0 - %a ) * \Pi / 180}'% (azimuth))
+    st.latex('nz = \cos{(90.0 - abs(%a)) * \Pi / 180}'% (elevation))
+    st.latex('ny = \sqrt{\smash[b]{1 - %a^2 - %a^2}}'% (nx,nz))
+    st.latex('t = (%a - %a) / nz'% (height,receiver_coords[2]))
+    st.latex('x = %a + %a * %a'% (receiver_coords[0],t,nx))
+    st.latex('y = %a - %a * %a'% (receiver_coords[1],t,ny))
+    st.latex('x = %a '% (x))
+    st.latex('y = %a '% (y))
+
     return [x, y]
 
 
@@ -98,7 +110,7 @@ def calculate_data(iq_data):
         data_table_1.append([i_curr,q_curr,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,converted_to_plus_minus])
     phase_ref = np.mean(ref_phases)
     st.markdown('#')
-    st.markdown('### **<h3 style="color:Blue;">Table Reference Period</h3>**',unsafe_allow_html=True)
+    st.markdown('### **<h3 style="color:Blue;">1. Table Reference Period</h3>**',unsafe_allow_html=True)
     df = pd.DataFrame(data_table_1,columns=('I','Q','Rad Phase (Current)','Rad Phase (Next)','Deg Phase (Current)','Deg Phase (Next)','Deg Phase (Next-Current)','to_plus_minus function'))
     st.table(df)
     st.write("**Phase Reference:**",phase_ref)
@@ -135,7 +147,7 @@ def calculate_data(iq_data):
             azimuth_phases.append(diff_phase)
             data_table_2.append([i_curr,q_curr,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,diff_phase,diff_phase,0])
     st.markdown('##')
-    st.markdown('### **<h3 style="color:Blue;">Table Sample Slot</h3>**',unsafe_allow_html=True)
+    st.markdown('### **<h3 style="color:Blue;">2. Table Sample Slot</h3>**',unsafe_allow_html=True)
     df = pd.DataFrame(data_table_2,columns=('I','Q','Rad Phase (Current)','Rad Phase (Next)','Deg Phase (Current)','Deg Phase (Next)','Deg Diff Phase','to_plus_minus function','Azimuth Phase','Elevation Phase'))
     st.table(df)
     st.write("**Keterangan Tabel Sample Slot:**")
@@ -152,7 +164,7 @@ def calculate_data(iq_data):
 
 
     st.markdown('##')
-    st.markdown('### **<h3 style="color:Blue;">MUSIC Algorithm</h3>**',unsafe_allow_html=True)
+    st.markdown('### **<h3 style="color:Blue;">3. MUSIC Algorithm</h3>**',unsafe_allow_html=True)
     st.write("**Perhitungan Azimuth Angle**")
     st.write("Semua isi kolom **Azimuth Phase** dari tabel **Sample Slot** diproses dengan Python Code Berikut:")
     code = '''
@@ -218,25 +230,40 @@ def calculate_data(iq_data):
     st.write("**Menentukan Estimasi Koordinat(x, y)**")
     st.write("Berikut adalah penjelasan proses/ urutan menentukan koordinat dari python code:")
     code = '''
-    nx = np.cos(np.deg2rad(90.0 - azimuth))
-    nz = np.cos(np.deg2rad(90.0 - abs(elevation)))
+    nx = numpy.cos(np.deg2rad(90.0 - azimuth)) 
+    nz = numpy.cos(np.deg2rad(90.0 - abs(elevation)))
     if math.isclose(nx, 0.0, abs_tol=1e-16) or math.isclose(nz, 0.0, abs_tol=1e-16):
         return [float("nan"),  float("nan")]
     else:
-        ny = np.sqrt(1 - nx ** 2 - nz ** 2)
-        t = (height - receiver_coords[2]) / nz
-        x = receiver_coords[0] + t * nx
-        y = receiver_coords[1] - t * ny
+        ny = numpy.sqrt(1 - nx ** 2 - nz ** 2)
+        t = (z_beacon - z_locator) / nz
+        x = x_locator + t * nx
+        y = y_locator - t * ny
     return [x, y]'''
+
     st.code(code, language='python')
+
+    st.write("Atau jika ditulis dalam formula matematika adalah sebagai berikut: ")
+    st.latex('nx = \cos{(90.0 - azimuth) * \Pi / 180}')
+    st.latex('nz = \cos{(90.0 - abs(elevation)) * \Pi / 180}')
+    st.latex('ny = \sqrt{\smash[b]{1 - nx^2 - nz^2}}')
+    st.latex('t = (z_beacon - z_locator) / nz')
+    st.latex('x = x_locator + t * nx')
+    st.latex('y = y_locator - t * ny')
 
     xy = get_coordinate(azimuth_angle, elevation_angle, z_beacon, [x_locator, y_locator, z_locator])
     if not math.isnan(xy[0]) and not math.isnan(xy[1]):
         data_table_3 = [[azimuth_angle,elevation_angle,xy[0],xy[1]]]
         st.markdown('##')
-        st.markdown('### **<h3 style="color:Blue;">Table Hasil</h3>**',unsafe_allow_html=True)
+        st.markdown('### **<h3 style="color:Blue;">4. Table Hasil</h3>**',unsafe_allow_html=True)
         df = pd.DataFrame(data_table_3,columns=('Azimuth Angle','Elevation Angle','X','Y'))
         st.table(df)
+
+        st.markdown('### **<h3 style="color:Blue;">5. Sigma Filter</h3>**',unsafe_allow_html=True)
+        st.write("""
+        Untuk melakukan sigma filter dibutuhkan minimal **6** data dari **Tabel Hasil**, dimana untuk index **1-5** akan dijadikan sebagai sampel dan diambil rata-rata dari **X** dan **Y**. kemudian rata-rata **X** dan **Y** dari sample tersebut akan dibandingkan dengan **X** dan **Y** yang berikutnya(hitungan ke 6, dst).
+        Jika **X** dan **Y** mendekati dengan rata-rata sample yang telah diambil maka **X** dan **Y** tersebut dinyatakan valid, tetapi jika **X** dan **Y** terlalu jauh dari rata-rata sample maka data **X** dan **Y** akan dibuang.
+        """)
 
 
 
@@ -245,7 +272,7 @@ with st.form(key='my_form'):
     # calculate = st.form_submit_button("Calculate")
     col1, col2, col3 = st.columns([0.9,0.9,5])
     with col1:
-        calculate = st.form_submit_button("Submit")
+        calculate = st.form_submit_button("Generate Estimation")
     with col2:
         clear = st.form_submit_button("Clear")    
     if calculate:
