@@ -111,6 +111,7 @@ def calculate_data(iq_data):
     phase_ref = np.mean(ref_phases)
     st.markdown('#')
     st.markdown('### **<h3 style="color:Blue;">1. Table Reference Period</h3>**',unsafe_allow_html=True)
+    st.write("Data IQ yang diambil hanya Index IQ ke 1 sampai 8")
     df = pd.DataFrame(data_table_1,columns=('I','Q','Rad Phase (Current)','Rad Phase (Next)','Deg Phase (Current)','Deg Phase (Next)','Deg Phase (Next-Current)','to_plus_minus function'))
     st.table(df)
     st.write("**Phase Reference:**",phase_ref)
@@ -130,6 +131,7 @@ def calculate_data(iq_data):
     
     data_table_2 = []
     iq_2ant_batches = [iq_samples[n:n + 2] for n in range(N_SAMPLES_OF_REF_PERIOD, len(iq_samples), 2)]
+    
     for iq_batch_idx, iq_batch in enumerate(iq_2ant_batches[:-1]):
         i_next, q_next = iq_batch[1][0], iq_batch[1][1]
         iq_next = complex(i_next,q_next)
@@ -147,16 +149,18 @@ def calculate_data(iq_data):
         else:
             x_00.append(1)
             azimuth_phases.append(diff_phase)
-            data_table_2.append([i_curr,q_curr,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,diff_phase,diff_phase,0])
+            data_table_2.append([i_curr,q_curr,i_next,q_next,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,diff_phase,diff_phase,0])
     st.markdown('##')
     st.markdown('### **<h3 style="color:Blue;">2. Table Sample Slot</h3>**',unsafe_allow_html=True)
-    df = pd.DataFrame(data_table_2,columns=('I','Q','Rad Phase (Current)','Rad Phase (Next)','Deg Phase (Current)','Deg Phase (Next)','Deg Diff Phase','to_plus_minus function','Azimuth Phase','Elevation Phase'))
+    df = pd.DataFrame(data_table_2,columns=('I(Current)','Q(Current)','I(Next)','Q(Next)','Rad Phase (Current)','Rad Phase (Next)','Deg Phase (Current)','Deg Phase (Next)','Deg Diff Phase','to_plus_minus function','Azimuth Phase','Elevation Phase'))
     st.table(df)
     st.write("**Keterangan Tabel Sample Slot:**")
-    st.write("**I:** Data I")
-    st.write("**Q:** Data Q")
-    st.write("**Rad Phase (Current):** Hasil hitung iq dalam bentuk radian, i dan q dihitung menggunakan fungsi numpy.arctan2(iq.imaginary, iq.real)")
-    st.write("**Rad Phase (Next):** Hasil hitung iq yang berikutnya(index iq+1) dalam bentuk radian, i dan q dihitung menggunakan fungsi numpy.arctan2(iq.imaginary, iq.real)")
+    st.write("**I (Current):** Data I current")
+    st.write("**Q (Current):** Data Q current")
+    st.write("**I (Next):** Data I next")
+    st.write("**Q (Next):** Data Q next")
+    st.write("**Rad Phase (Current):** Hasil hitung iq dalam bentuk radian dari kolom **I(Current) dan Q(Current)**, i dan q dihitung menggunakan fungsi numpy.arctan2(iq.imaginary, iq.real)")
+    st.write("**Rad Phase (Next):** Hasil hitung iq dalam bentuk radian dari kolom **I(Next) dan Q(Next)**, i dan q dihitung menggunakan fungsi numpy.arctan2(iq.imaginary, iq.real)")
     st.write("**Deg Phase (Current):** Hasil konversi dari kolom **Rad Phase (Current)** yang sebelumnya radian menjadi degree, menggunakan fungsi numpy.rad2deg()")
     st.write("**Deg Phase (Next):** Hasil konversi dari kolom **Rad Phase (Next)** yang sebelumnya radian menjadi degree, menggunakan fungsi numpy.rad2deg()")
     st.latex('numpy.rad2deg() = radian * 180 / \Pi')
