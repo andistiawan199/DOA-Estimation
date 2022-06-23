@@ -77,7 +77,7 @@ def get_coordinate(azimuth, elevation, height, receiver_coords):
     st.latex('nx = \cos{(90.0 - %a ) * \Pi / 180}'% (azimuth))
     st.latex('nz = \cos{(90.0 - abs(%a)) * \Pi / 180}'% (elevation))
     st.latex('ny = \sqrt{\smash[b]{1 - %a^2 - %a^2}}'% (nx,nz))
-    st.latex('t = (%a - %a) / nz'% (height,receiver_coords[2]))
+    st.latex('t = (%a - %a) / %a'% (height,receiver_coords[2],nz))
     st.latex('x = %a + %a * %a'% (receiver_coords[0],t,nx))
     st.latex('y = %a - %a * %a'% (receiver_coords[1],t,ny))
     st.latex('x = %a '% (x))
