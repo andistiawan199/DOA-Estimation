@@ -145,7 +145,7 @@ def calculate_data(iq_data):
         diff_phase = to_plus_minus_pi(phase_total)
         if iq_batch_idx % 2 != 0:
             elevation_phases.append(diff_phase)
-            data_table_2.append([i_curr,q_curr,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,diff_phase,0,diff_phase])
+            data_table_2.append([i_curr,q_curr,i_next,q_next,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,diff_phase,0,diff_phase])
         else:
             x_00.append(1)
             azimuth_phases.append(diff_phase)
