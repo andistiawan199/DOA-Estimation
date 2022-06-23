@@ -152,6 +152,7 @@ def calculate_data(iq_data):
             data_table_2.append([i_curr,q_curr,i_next,q_next,phase_cur_rad,phase_next_rad,phase_cur,phase_next,phase_total,diff_phase,diff_phase,0])
     st.markdown('##')
     st.markdown('### **<h3 style="color:Blue;">2. Table Sample Slot</h3>**',unsafe_allow_html=True)
+    st.write("Data IQ yang diambil dimulai dari index ke 9 dst.")
     df = pd.DataFrame(data_table_2,columns=('I(Current)','Q(Current)','I(Next)','Q(Next)','Rad Phase (Current)','Rad Phase (Next)','Deg Phase (Current)','Deg Phase (Next)','Deg Diff Phase','to_plus_minus function','Azimuth Phase','Elevation Phase'))
     st.table(df)
     st.write("**Keterangan Tabel Sample Slot:**")
