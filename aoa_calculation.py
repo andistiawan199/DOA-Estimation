@@ -31,10 +31,11 @@ with st.sidebar:
     z_locator = st.number_input("Z Locator",0.2)
     z_beacon = st.number_input("Z Beacon",0.814)
 
-    frequency = st.number_input("Enter Raw IQ heres",2480)
+    frequency = st.number_input("Frequency",2480)
     wavelength = st.number_input("Wavelength",0.12)
     d = st.number_input("d",0.05)
     M = st.number_input("M",2)
+
 
 def to_plus_minus_pi(angle):
     while angle >= 180:
@@ -86,7 +87,7 @@ def get_coordinate(azimuth, elevation, height, receiver_coords):
     return [x, y]
 
 
-def calculate_data(iq_data):
+def calculate_data(iq_data, single_iq):
     x_00, azimuth_x_12, elevation_x_12 = [], [], []
     azimuth_phases, elevation_phases = [], []
     ref_phases = []
@@ -262,17 +263,18 @@ def calculate_data(iq_data):
 
     xy = get_coordinate(azimuth_angle, elevation_angle, z_beacon, [x_locator, y_locator, z_locator])
     if not math.isnan(xy[0]) and not math.isnan(xy[1]):
-        data_table_3 = [[azimuth_angle,elevation_angle,xy[0],xy[1]]]
-        st.markdown('##')
-        st.markdown('### **<h3 style="color:Blue;">4. Table Hasil</h3>**',unsafe_allow_html=True)
-        df = pd.DataFrame(data_table_3,columns=('Azimuth Angle','Elevation Angle','X','Y'))
-        st.table(df)
+        if(single_iq):
+            data_table_3 = [[azimuth_angle,elevation_angle,xy[0],xy[1]]]
+            st.markdown('##')
+            st.markdown('### **<h3 style="color:Blue;">4. Table Hasil</h3>**',unsafe_allow_html=True)
+            df = pd.DataFrame(data_table_3,columns=('Azimuth Angle','Elevation Angle','X','Y'))
+            st.table(df)
 
-        st.markdown('### **<h3 style="color:Blue;">5. Sigma Filter</h3>**',unsafe_allow_html=True)
-        st.write("""
-        Untuk melakukan sigma filter dibutuhkan minimal **6** data dari **Tabel Hasil**, dimana untuk index **1-5** akan dijadikan sebagai sampel dan diambil rata-rata dari **X** dan **Y**. kemudian rata-rata **X** dan **Y** dari sample tersebut akan dibandingkan dengan **X** dan **Y** yang berikutnya(hitungan ke 6, dst).
-        Jika **X** dan **Y** mendekati dengan rata-rata sample yang telah diambil maka **X** dan **Y** tersebut dinyatakan valid, tetapi jika **X** dan **Y** terlalu jauh dari rata-rata sample maka data **X** dan **Y** akan dibuang.
-        """)
+            st.markdown('### **<h3 style="color:Blue;">5. Sigma Filter</h3>**',unsafe_allow_html=True)
+            st.write("""
+            Untuk melakukan sigma filter dibutuhkan minimal **6** data dari **Tabel Hasil**, dimana untuk index **1-5** akan dijadikan sebagai sampel dan diambil rata-rata dari **X** dan **Y**. kemudian rata-rata **X** dan **Y** dari sample tersebut akan dibandingkan dengan **X** dan **Y** yang berikutnya(hitungan ke 6, dst).
+            Jika **X** dan **Y** mendekati dengan rata-rata sample yang telah diambil maka **X** dan **Y** tersebut dinyatakan valid, tetapi jika **X** dan **Y** terlalu jauh dari rata-rata sample maka data **X** dan **Y** akan dibuang.
+            """)
 
 
 
@@ -289,7 +291,8 @@ with st.form(key='my_form'):
             st.error("Raw IQ cannot empty")
         else:
             try:
-                calculate_data(iq)
+                # with st.expander("See explanation"):
+                calculate_data(iq,True)
             except BaseException as e:
                 st.error(e)
     if clear:
